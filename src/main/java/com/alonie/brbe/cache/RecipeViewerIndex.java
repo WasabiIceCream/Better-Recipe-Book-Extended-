@@ -44,6 +44,30 @@ public final class RecipeViewerIndex {
 
     private RecipeViewerIndex() {}
 
+    /**
+     * Set by {@link #markDirty()}, consumed by {@link #tick()}.  {@link #rebuildEngine()}
+     * is a full O(known recipes) rescan — cheap for one recipe unlocking, but a modpack
+     * with thousands of known recipes visibly stutters if it runs once per packet while
+     * several recipes unlock in quick succession (each its own
+     * {@code ClientboundRecipeBookAddPacket}).  Deferring to the next client tick coalesces
+     * a whole burst into a single rebuild.
+     */
+    private static volatile boolean dirty;
+
+    /** Marks the index stale; the actual rebuild happens on the next {@link #tick()}. */
+    public static void markDirty() {
+        dirty = true;
+    }
+
+    /** Call once per client tick (see {@code BetterRecipeBookClientFabric}).  Rebuilds the
+     *  engine index only if {@link #markDirty()} was called since the last tick. */
+    public static void tick() {
+        if (dirty) {
+            dirty = false;
+            rebuildEngine();
+        }
+    }
+
     /** The recipe book's known display entries, or empty if unavailable. */
     private static List<RecipeDisplayEntry> knownEntries() {
         Minecraft mc = Minecraft.getInstance();
@@ -76,8 +100,6 @@ public final class RecipeViewerIndex {
         for (Map.Entry<String, List<RecipeViewerEngine.IndexedRecipe>> e : grouped.entrySet()) {
             RecipeViewerEngine.registerType(e.getKey(), e.getValue(), stationItems.get(e.getKey()));
         }
-        BetterRecipeBook.LOGGER.info("[BRBE] rebuildEngine: {} types, {} entries",
-                grouped.size(), grouped.values().stream().mapToInt(List::size).sum());
         RecipeViewerEngine.notifyRebuilt();
     }
 

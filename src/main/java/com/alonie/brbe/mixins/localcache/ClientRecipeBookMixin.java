@@ -51,9 +51,11 @@ public abstract class ClientRecipeBookMixin {
 
     @Inject(method = "rebuildCollections", at = @At("RETURN"))
     private void brbe$postRebuildEndCycle(CallbackInfo ci) {
-        com.alonie.brbe.BetterRecipeBook.LOGGER.info(
-                "[BRBE-CACHE] rebuild RETURN — known={}", known.size());
         RecipeBookState.endCycle();
-        RecipeViewerIndex.rebuildEngine();
+        // Deferred to the next client tick (see RecipeViewerIndex#tick) rather than rebuilt
+        // inline here — this fires once per recipe-book packet, and a burst of packets
+        // (many recipes unlocking at once) would otherwise trigger one full O(known
+        // recipes) rescan per packet.
+        RecipeViewerIndex.markDirty();
     }
 }

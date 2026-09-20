@@ -56,7 +56,7 @@ public final class ConfigTipsHelper {
                 return builder.build();
             };
             provider.setBuildFunction(buildFn);
-            Minecraft.getInstance().gui.setScreen((Screen) provider.get());
+            Minecraft.getInstance().setScreen((Screen) provider.get());
         } catch (NoClassDefFoundError e) {
             // Cloth Config not available
         }

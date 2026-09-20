@@ -1031,7 +1031,7 @@ public final class RecipeViewerOverlay {
         // 3x3 "cannot craft here" warning comes above the source-mod line.
         if (BetterRecipeBook.config.showAllRecipesInSurvival
                 && !BetterRecipeBook.config.hideIncompatibleMark
-                && mc.gui.screen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen) {
+                && mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen) {
             if (IncompatibleCraftingUtil.checkIncompatible(overlay.getRecipeCollection(), id)) {
                 lines.add(Component.empty());
                 lines.add(Component.translatable("zzzbrbe.gui.environmentIncompatible")

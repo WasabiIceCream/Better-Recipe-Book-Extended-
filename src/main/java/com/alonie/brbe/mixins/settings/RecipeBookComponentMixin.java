@@ -54,7 +54,7 @@ public abstract class RecipeBookComponentMixin {
             this._$settingsButton = new ImageButton(i + BookLayout.SETTINGS_X_OFFSET, j,
                     BookLayout.settingsSize(), BookLayout.settingsSize(),
                     BRBTextures.SETTINGS_BUTTON_SPRITES, button ->
-                    ConfigTipsHelper.openConfigScreen(BrbeConfig.class, Minecraft.getInstance().gui.screen()));
+                    ConfigTipsHelper.openConfigScreen(BrbeConfig.class, Minecraft.getInstance().screen));
         }
     }
 
@@ -82,7 +82,7 @@ public abstract class RecipeBookComponentMixin {
     public void drawTooltip(GuiGraphicsExtractor gui, int mouseX, int mouseY, Slot hoveredSlot, CallbackInfo ci) {
         if (!this.isVisible()) return;
         if (this._$settingsButton != null && this._$settingsButton.isHoveredOrFocused()
-                && BetterRecipeBook.config.settingsButton && Minecraft.getInstance().gui.screen() != null) {
+                && BetterRecipeBook.config.settingsButton && Minecraft.getInstance().screen != null) {
             ClientCompat.setComponentTooltipForNextFrame(gui,
                     java.util.List.of(Component.translatable("zzzbrbe.gui.settings.open")), mouseX, mouseY);
         }

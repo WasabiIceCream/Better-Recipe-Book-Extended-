@@ -46,7 +46,7 @@ public abstract class MultiPlayerGameModeMixin {
         boolean isCacheRecipe = VanillaRecipeCache.isLocalRecipe(recipe);
 
         if ((isUnlockAll || isCacheRecipe) && minecraft.player != null && minecraft.gameMode != null &&
-                minecraft.gui.screen() instanceof AbstractRecipeBookScreen<?> screen && minecraft.player.containerMenu instanceof RecipeBookMenu menu) {
+                minecraft.screen instanceof AbstractRecipeBookScreen<?> screen && minecraft.player.containerMenu instanceof RecipeBookMenu menu) {
             RecipeBookComponent<?> comp = ((AbstractRecipeBookScreenAccessor) screen).brbe$getRecipeBookComponent();
 
             RecipeBookPage page = ((RecipeBookComponentAccessor) comp).getRecipeBookPage();

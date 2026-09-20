@@ -32,6 +32,23 @@ public final class RecipeBookState {
     private static Map<RecipeDisplayId, RecipeDisplayEntry> currentKnown;
     private static int cycleDepth;
 
+    /**
+     * Set every time a {@code rebuildCollections()} cycle begins — i.e. whenever the
+     * known-recipe set may have changed (a recipe unlocked/revoked, or the cache/test
+     * injections above ran). Consumed by
+     * {@code incompletecrafting/RecipeBookComponentMixin#brbe$keepPartiallyCraftable}'s
+     * skip-gate, which otherwise only compares an inventory-contents hash and has no way
+     * to notice a newly-unlocked recipe on its own: {@code updateCollections()} fires for
+     * both "inventory changed" and "known set changed" reasons, but before this flag
+     * existed the gate treated an unchanged inventory as "nothing to do" even when a brand
+     * new recipe had just entered the collections list — leaving it unclassified (not
+     * marked partial/craftable) until something else (e.g. a slot hash change from
+     * picking an item up and putting it back) forced a full pass. See the 2026-09-08
+     * session notes in <code>docs/current-state.md</code> of the parent server repo for
+     * the original bug report this fixes.
+     */
+    private static boolean knownSetChanged;
+
     private RecipeBookState() {}
 
     // ---- Lifecycle ----
@@ -46,6 +63,7 @@ public final class RecipeBookState {
         currentBook = book;
         currentKnown = known;
         cycleDepth++;
+        knownSetChanged = true;
 
         // Phase 1: inject cached vanilla recipes if the server is sparse
         if (VanillaRecipeCache.hasEntries()) {
@@ -53,6 +71,18 @@ public final class RecipeBookState {
         }
         // Phase 1.5: JVM-gated test recipes (-Dava.test.recipes=N)
         TestRecipes.injectInto(known);
+    }
+
+    /**
+     * Whether the known-recipe set has changed since the last call to this method, and
+     * clears the flag (matches the consume-once shape of
+     * {@code BetterRecipeBook.ctx().events().consumeConfigChange()}, which the
+     * partial-craftability gate already checks alongside this).
+     */
+    public static boolean consumeKnownSetChanged() {
+        boolean changed = knownSetChanged;
+        knownSetChanged = false;
+        return changed;
     }
 
     /**

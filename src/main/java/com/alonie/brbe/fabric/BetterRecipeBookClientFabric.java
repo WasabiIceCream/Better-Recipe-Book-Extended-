@@ -82,8 +82,9 @@ public class BetterRecipeBookClientFabric implements ClientModInitializer {
             // Apply overlay hide state immediately when screen opens (no flash)
             OverlayHider.setOverlaysHidden(BetterRecipeBook.config.hideReiJeiOverlay);
         });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> com.alonie.brbe.cache.RecipeViewerIndex.tick());
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            Screen screen = client.gui.screen();
+            Screen screen = client.screen;
             if (BetterRecipeBook.config.hideReiJeiOverlay && screen != null) {
                 OverlayHider.ensureJeiOverlayHidden();
             }

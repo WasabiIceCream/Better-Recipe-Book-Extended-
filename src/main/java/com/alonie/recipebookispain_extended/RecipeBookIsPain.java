@@ -270,16 +270,30 @@ public class RecipeBookIsPain {
         for (CreativeModeTab tab : pinned) {
             if (!MIRRORED_ITEM_GROUPS.contains(tab)) continue;
             Optional.ofNullable(toRecipeBookGroup(tab))
-                    .map(group -> new RecipeBookComponent.TabInfo(tab.getIconItem(), Optional.empty(), group))
+                    .map(group -> safeIconItem(tab).map(icon -> new RecipeBookComponent.TabInfo(icon, Optional.empty(), group)))
+                    .flatMap(java.util.function.Function.identity())
                     .ifPresent(expandedTabs::add);
         }
         for (CreativeModeTab tab : MIRRORED_ITEM_GROUPS) {
             if (pinned.contains(tab)) continue;
             Optional.ofNullable(toRecipeBookGroup(tab))
-                    .map(group -> new RecipeBookComponent.TabInfo(tab.getIconItem(), Optional.empty(), group))
+                    .map(group -> safeIconItem(tab).map(icon -> new RecipeBookComponent.TabInfo(icon, Optional.empty(), group)))
+                    .flatMap(java.util.function.Function.identity())
                     .ifPresent(expandedTabs::add);
         }
         return expandedTabs;
+    }
+
+    // Some CreativeModeTab implementations (e.g. resourcefullib's ResourcefulCreativeModeTab)
+    // can have a null icon supplier if the owning mod never called setItemIcon; getIconItem()
+    // then throws NPE. Skip that tab in the recipe book instead of crashing the inventory screen.
+    private static Optional<ItemStack> safeIconItem(CreativeModeTab tab) {
+        try {
+            return Optional.of(tab.getIconItem());
+        } catch (Exception e) {
+            LOGGER.warn("Skipping creative tab '{}' in recipe book: failed to get icon item", tab.getDisplayName().getString(), e);
+            return Optional.empty();
+        }
     }
 
     // ------------------------------------------------

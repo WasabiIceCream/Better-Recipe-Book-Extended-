@@ -21,7 +21,7 @@ public interface ISettingsButton {
         if (BetterRecipeBook.config.settingsButton) {
             return new ImageButton(i + BookLayout.SETTINGS_X_OFFSET, j + BookLayout.settingsY(),
                     BookLayout.settingsSize(), BookLayout.settingsSize(), BRBTextures.SETTINGS_BUTTON_SPRITES, button ->
-                    ConfigTipsHelper.openConfigScreen(BrbeConfig.class, Minecraft.getInstance().gui.screen()));
+                    ConfigTipsHelper.openConfigScreen(BrbeConfig.class, Minecraft.getInstance().screen));
         }
         return null;
     }
@@ -41,7 +41,7 @@ public interface ISettingsButton {
     // TODO: Remove this and use .setTooltip and render it automatically
     default void renderSettingsButtonTooltip(@Nullable ImageButton settingsButton, GuiGraphicsExtractor gui, int mouseX, int mouseY) {
         if (settingsButton != null && settingsButton.isHoveredOrFocused() && BetterRecipeBook.config.settingsButton
-                && Minecraft.getInstance().gui.screen() != null) {
+                && Minecraft.getInstance().screen != null) {
             ClientCompat.setComponentTooltipForNextFrame(gui, java.util.List.of(OPEN_SETTINGS_TOOLTIP), mouseX, mouseY);
         }
     }

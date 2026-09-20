@@ -108,7 +108,7 @@ public abstract class RecipeBookComponentMixin {
         boolean retainIncompatible = BetterRecipeBook.config.showAllRecipesInSurvival
                 && !isFiltering
                 && this.minecraft != null
-                && this.minecraft.gui.screen() instanceof InventoryScreen;
+                && this.minecraft.screen instanceof InventoryScreen;
         IncompatibleCraftingUtil.beginFiltering(retainIncompatible);
     }
 
@@ -149,7 +149,7 @@ public abstract class RecipeBookComponentMixin {
 
         // ── Gate variables: single point of truth for each concern ──
         boolean onInventoryScreen = this.minecraft != null
-                && this.minecraft.gui.screen() instanceof InventoryScreen;
+                && this.minecraft.screen instanceof InventoryScreen;
         boolean retainPartial = BetterRecipeBook.config.partialMarkingEnabled;
         boolean retainIncompatible = onInventoryScreen
                 && BetterRecipeBook.config.showAllRecipesInSurvival;
@@ -169,7 +169,12 @@ public abstract class RecipeBookComponentMixin {
         // updateCollections(true,true) from a render hook.
         boolean configChanged = BetterRecipeBook.ctx() != null
                 && BetterRecipeBook.ctx().events().consumeConfigChange();
-        if (!inventoryChanged && !retainIncompatible && !configChanged) {
+        // A recipe unlocking (or revoking) also needs the full pass below, even with the
+        // inventory completely untouched — otherwise a newly-unlocked recipe sits
+        // unclassified (never marked partial/craftable) until something unrelated changes
+        // the slot hash. See RecipeBookState#consumeKnownSetChanged's javadoc.
+        boolean knownSetChanged = RecipeBookState.consumeKnownSetChanged();
+        if (!inventoryChanged && !retainIncompatible && !configChanged && !knownSetChanged) {
             return collections.removeIf(predicate);
         }
 

@@ -27,7 +27,7 @@ public class RecipeBookTooltipMixin {
 
     @Inject(at = @At("TAIL"), method = "extractTooltip")
     private void rbip$renderTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY, Slot hoveredSlot, CallbackInfo ci) {
-        if (minecraft.gui.screen() != null) {
+        if (minecraft.screen != null) {
             // The BRBE query UI (viewer box / preview / pin) owns the cursor:
             // the tab under it must not show its tooltip (no leak-through).
             boolean masked = com.alonie.brbe.util.RecipeViewerOverlay.modalMaskOwnsCursor(mouseX, mouseY);
