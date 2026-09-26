@@ -94,7 +94,8 @@
     "recipebook.RecipeBookToggleFocusMixin",
     "hoverghost.RecipeBookComponentMixin",
     "hoverghost.RecipeBookPageMixin",
-    "hoverghost.OverlayRecipeComponentMixin"
+    "hoverghost.OverlayRecipeComponentMixin",
+    "hideoverlay.AbstractContainerScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

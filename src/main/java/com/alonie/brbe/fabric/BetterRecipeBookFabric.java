@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 public class BetterRecipeBookFabric implements ModInitializer {
     @Override
     public void onInitialize() {
+        LegacyFileMigration.run();
         BetterRecipeBook.init();
         // 酿造/锻造进度触发器数据包：服务器启动（含集成服务器/LAN/多机）时按
         // 服务器权威世界路径写入当前世界 datapacks（客户端 JOIN 时机路径不可靠；
