@@ -409,6 +409,8 @@ public final class RecipeViewerOverlay {
      *  (host screen closed) — the spec's {@code materialized} flag is cleared
      *  by {@link #close()}. */
     public static void restorePendingViewers() {
+        // Gameoverse: LEI off means no floating windows, restored ones included.
+        if (!BetterRecipeBook.config.recipeViewerEnabled) return;
         // 预览模式：查询窗口生命周期不持久化——关闭当前界面并重开后不再恢复。
         if (BetterRecipeBook.config.previewMode) return;
         initViewerPersistence();
@@ -531,6 +533,8 @@ public final class RecipeViewerOverlay {
      *  own window; already-open windows are never touched).  Returns whether
      *  the query was consumed. */
     private static boolean openNewViewer(AbstractContainerScreen<?> screen, boolean viewUsage) {
+        // Gameoverse: with LEI off, R/U fall through to real JEI's own bindings.
+        if (!BetterRecipeBook.config.recipeViewerEnabled) return false;
         ViewerInstance w = new ViewerInstance();
         if (w.open(screen, viewUsage)) {
             WINDOWS.add(w);
@@ -547,6 +551,13 @@ public final class RecipeViewerOverlay {
      *  the openFor fallback and CLOSED the live window). */
     private static boolean openNewViewer(AbstractContainerScreen<?> screen, ItemStack target,
                                          boolean viewUsage) {
+        // Gameoverse: with LEI off, explicit targets (workstation tabs/titles) open real
+        // JEI's recipe screen instead of a floating LEI window.
+        if (!BetterRecipeBook.config.recipeViewerEnabled) {
+            return showInJei(target, viewUsage
+                    ? mezz.jei.api.recipe.RecipeIngredientRole.CRAFTING_STATION
+                    : mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT);
+        }
         ViewerInstance w = new ViewerInstance();
         if (w.openFor(screen, target, viewUsage)) {
             WINDOWS.add(w);
@@ -554,6 +565,24 @@ public final class RecipeViewerOverlay {
             return true;
         }
         return false;
+    }
+
+    /** Gameoverse: open real JEI's recipe screen focused on {@code stack} (controller
+     *  friendly, a normal screen that Escape closes). False if JEI's runtime isn't up. */
+    private static boolean showInJei(ItemStack stack, mezz.jei.api.recipe.RecipeIngredientRole role) {
+        if (stack == null || stack.isEmpty()) return false;
+        try {
+            mezz.jei.api.runtime.IJeiRuntime runtime =
+                    com.alonie.brbe.jei.plugins.engine.JeiRuntimeBridge.runtime();
+            if (runtime == null) return false;
+            mezz.jei.api.recipe.IFocus<ItemStack> focus = runtime.getJeiHelpers().getFocusFactory()
+                    .createFocus(role, mezz.jei.api.constants.VanillaTypes.ITEM_STACK, stack);
+            runtime.getRecipesGui().show(focus);
+            return true;
+        } catch (Exception | LinkageError e) {
+            BetterRecipeBook.LOGGER.warn("[BRBE] Couldn't open JEI for {}: {}", stack, e.toString());
+            return false;
+        }
     }
 
     /** 工作站标题触发：以 {@code station} 为用途查询目标打开<b>新</b>查询窗口
