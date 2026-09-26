@@ -289,11 +289,18 @@ public class RecipeBookIsPain {
     // ResourcefulCreativeModeTab) can have a null icon supplier if the owning mod never
     // called setItemIcon; getIconItem() then throws NPE and crashed the inventory screen.
     // Skip that tab in the recipe book instead.
+    private static final java.util.Set<CreativeModeTab> BROKEN_ICON_TABS =
+            java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
     private static Optional<ItemStack> safeIconItem(CreativeModeTab tab) {
         try {
             return Optional.of(tab.getIconItem());
         } catch (Exception e) {
-            LOGGER.warn("Skipping creative tab '{}' in recipe book: failed to get icon item", tab.getDisplayName().getString(), e);
+            // Tabs are rebuilt on every recipe-book refresh; warn once per tab, no trace.
+            if (BROKEN_ICON_TABS.add(tab)) {
+                LOGGER.warn("Skipping creative tab '{}' in recipe book: failed to get icon item ({})",
+                        tab.getDisplayName().getString(), e.toString());
+            }
             return Optional.empty();
         }
     }
