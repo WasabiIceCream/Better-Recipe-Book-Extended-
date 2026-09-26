@@ -1,7 +1,7 @@
 """For every mixin injector, check each INVOKE/FIELD/NEW @At target actually occurs
 inside the injected method's bytecode in the 26.1.2 game jar / JEI jar."""
 import re,subprocess,pathlib,zipfile,json,sys
-mc='/home/wasabi/.gradle/caches/fabric-loom/26.1.2/minecraft-merged.jar'; jei='libs/jei-26.1.2-fabric-29.43.0.105.jar'
+mc=str(pathlib.Path.home()/'.gradle/caches/fabric-loom/26.1.2/minecraft-merged.jar'); jei='libs/jei-26.1.2-fabric-29.43.0.105.jar'
 zips=[zipfile.ZipFile(mc),zipfile.ZipFile(jei)]; cp=f'{mc}:{jei}'
 def exists(c): return any(c+'.class' in z.namelist() for z in zips)
 bodies={}

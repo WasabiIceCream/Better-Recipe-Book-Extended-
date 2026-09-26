@@ -1,5 +1,5 @@
 import re,subprocess,pathlib,zipfile,json
-mc='/home/wasabi/.gradle/caches/fabric-loom/26.1.2/minecraft-merged.jar'; jei='libs/jei-26.1.2-fabric-29.43.0.105.jar'
+mc=str(pathlib.Path.home()/'.gradle/caches/fabric-loom/26.1.2/minecraft-merged.jar'); jei='libs/jei-26.1.2-fabric-29.43.0.105.jar'
 zips=[zipfile.ZipFile(mc),zipfile.ZipFile(jei)]; cp=f'{mc}:{jei}'
 def exists(c): return any(c+'.class' in z.namelist() for z in zips)
 memo={}
