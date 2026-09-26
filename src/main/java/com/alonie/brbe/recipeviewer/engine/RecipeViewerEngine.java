@@ -98,6 +98,18 @@ public final class RecipeViewerEngine {
         TYPES.put(uid, data);
     }
 
+    /** Gameoverse: append one recipe to {@code uid}'s existing data (creating it
+     *  if this is the first recipe seen for that type), without discarding what's
+     *  already registered, unlike {@link #registerType}, which always starts from a
+     *  fresh, empty {@code RecipeTypeData}.  Used by {@code RecipeViewerIndex}'s
+     *  incremental rebuild so unlocking a few recipes doesn't re-add every known one. */
+    public static void addRecipe(String uid, IndexedRecipe recipe, List<ItemStack> stations) {
+        if (uid == null || recipe == null || recipe.entry() == null) return;
+        RecipeTypeData data = TYPES.computeIfAbsent(uid, k -> new RecipeTypeData(uid, stations));
+        data.addRecipe(recipe.entry(), recipe.inputs(), recipe.outputs(), recipe.groupKey());
+        BY_ID.put(recipe.entry().id(), recipe.entry());
+    }
+
     /** Recipes of {@code uid} whose result is {@code target} (R). */
     public static List<RecipeDisplayEntry> resultsFor(String uid, ItemStack target) {
         RecipeTypeData data = TYPES.get(uid);

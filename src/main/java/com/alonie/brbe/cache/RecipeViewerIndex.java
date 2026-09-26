@@ -148,9 +148,66 @@ public final class RecipeViewerIndex {
         if (fingerprint == lastRebuildFingerprint && !forceRebuild) {
             return;
         }
+        boolean forced = forceRebuild;
         forceRebuild = false;
         lastRebuildFingerprint = fingerprint;
-        rebuildEngineInternal(known);
+        rebuildIncrementallyIfPossible(known, forced);
+    }
+
+    // ---- Gameoverse: incremental rebuild ----------------------------------------
+    // The coalescing above makes a burst of unlocks cost one rebuild per tick, but
+    // each full rebuild still rescans every known recipe (resolving inputs/outputs and
+    // a workstation per entry) on the render thread; with thousands of known recipes
+    // that alone hung the client for seconds when several recipe-unlock advancements
+    // fired at once. Normal play only ever adds recipes, so when the known set only
+    // grew, index just the new entries.
+
+    /** Display ids already folded into the engine by the last (full or incremental) rebuild. */
+    private static final java.util.Set<RecipeDisplayId> indexedIds = new java.util.HashSet<>();
+    /** The level the indexed ids came from. Display ids are assigned per world by the
+     *  server and may collide across world joins, so a new level forces a full rebuild. */
+    private static java.lang.ref.WeakReference<Object> indexedLevel = new java.lang.ref.WeakReference<>(null);
+
+    private static void rebuildIncrementallyIfPossible(List<RecipeDisplayEntry> known, boolean forced) {
+        java.util.Set<RecipeDisplayId> currentIds = new java.util.HashSet<>(known.size());
+        for (RecipeDisplayEntry entry : known) {
+            currentIds.add(entry.id());
+        }
+        Object level = net.minecraft.client.Minecraft.getInstance().level;
+        boolean sameLevel = level != null && indexedLevel.get() == level;
+        if (forced || !sameLevel || indexedIds.isEmpty() || !currentIds.containsAll(indexedIds)) {
+            rebuildEngineInternal(known);
+        } else {
+            Map<String, List<ItemStack>> stationItems = new LinkedHashMap<>();
+            for (Workstation station : workstations()) {
+                stationItems.computeIfAbsent(station.typeId(), k -> new ArrayList<>())
+                        .addAll(java.util.Arrays.asList(station.fallbackIcons()));
+            }
+            int added = 0;
+            for (RecipeDisplayEntry entry : known) {
+                if (indexedIds.contains(entry.id())) continue;
+                String path = categoryPath(entry);
+                for (Workstation station : workstations()) {
+                    if (!station.matchesPath(path)) continue;
+                    String uid = station.typeId();
+                    // Same rule as rebuildEngineInternal: stonecutting comes from the JEI runtime.
+                    if (!uid.equals("minecraft:stonecutting")) {
+                        RecipeViewerEngine.addRecipe(uid,
+                                new RecipeViewerEngine.IndexedRecipe(entry, inputStacks(entry), outputStacks(entry)),
+                                stationItems.get(uid));
+                        added++;
+                    }
+                    break;
+                }
+            }
+            BrbeLogger.log("BRBE", "rebuildEngine (incremental): {} new entries", added);
+            rebuildBookTypeSources();
+            rebuildProgressStationItems();
+            RecipeViewerEngine.notifyRebuilt();
+        }
+        indexedIds.clear();
+        indexedIds.addAll(currentIds);
+        indexedLevel = new java.lang.ref.WeakReference<>(level);
     }
 
     private static boolean engineDirty;

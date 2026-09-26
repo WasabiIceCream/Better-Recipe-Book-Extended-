@@ -271,16 +271,31 @@ public class RecipeBookIsPain {
         for (CreativeModeTab tab : pinned) {
             if (!MIRRORED_ITEM_GROUPS.contains(tab)) continue;
             Optional.ofNullable(toRecipeBookGroup(tab))
-                    .map(group -> new RecipeBookComponent.TabInfo(tab.getIconItem(), Optional.empty(), group))
+                    .map(group -> safeIconItem(tab).map(icon -> new RecipeBookComponent.TabInfo(icon, Optional.empty(), group)))
+                    .flatMap(java.util.function.Function.identity())
                     .ifPresent(expandedTabs::add);
         }
         for (CreativeModeTab tab : MIRRORED_ITEM_GROUPS) {
             if (pinned.contains(tab)) continue;
             Optional.ofNullable(toRecipeBookGroup(tab))
-                    .map(group -> new RecipeBookComponent.TabInfo(tab.getIconItem(), Optional.empty(), group))
+                    .map(group -> safeIconItem(tab).map(icon -> new RecipeBookComponent.TabInfo(icon, Optional.empty(), group)))
+                    .flatMap(java.util.function.Function.identity())
                     .ifPresent(expandedTabs::add);
         }
         return expandedTabs;
+    }
+
+    // Gameoverse: some CreativeModeTab implementations (e.g. resourcefullib's
+    // ResourcefulCreativeModeTab) can have a null icon supplier if the owning mod never
+    // called setItemIcon; getIconItem() then throws NPE and crashed the inventory screen.
+    // Skip that tab in the recipe book instead.
+    private static Optional<ItemStack> safeIconItem(CreativeModeTab tab) {
+        try {
+            return Optional.of(tab.getIconItem());
+        } catch (Exception e) {
+            LOGGER.warn("Skipping creative tab '{}' in recipe book: failed to get icon item", tab.getDisplayName().getString(), e);
+            return Optional.empty();
+        }
     }
 
     // ------------------------------------------------
@@ -335,7 +350,8 @@ public class RecipeBookIsPain {
             if (!activeTabs.contains(tab) || !MIRRORED_ITEM_GROUPS.contains(tab)) continue;
             ExtendedRecipeBookCategory group = groupMap.inverse().get(tab);
             if (group != null) {
-                expandedTabs.add(new RecipeBookComponent.TabInfo(tab.getIconItem(), Optional.empty(), group));
+                safeIconItem(tab).ifPresent(icon ->
+                        expandedTabs.add(new RecipeBookComponent.TabInfo(icon, Optional.empty(), group)));
             }
         }
         for (CreativeModeTab tab : MIRRORED_ITEM_GROUPS) {
@@ -343,7 +359,8 @@ public class RecipeBookIsPain {
             if (!activeTabs.contains(tab)) continue;
             ExtendedRecipeBookCategory group = groupMap.inverse().get(tab);
             if (group != null) {
-                expandedTabs.add(new RecipeBookComponent.TabInfo(tab.getIconItem(), Optional.empty(), group));
+                safeIconItem(tab).ifPresent(icon ->
+                        expandedTabs.add(new RecipeBookComponent.TabInfo(icon, Optional.empty(), group)));
             }
         }
         return expandedTabs;
