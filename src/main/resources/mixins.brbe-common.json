@@ -92,7 +92,6 @@
     "recipebookposition.GenericRecipeBookComponentMixin",
     "command.SuggestionsListMixin",
     "keybinding.KeyMappingSyncMixin",
-    "pausescreen.PauseScreenConfigButtonMixin",
     "recipebook.RecipeBookToggleFocusMixin",
     "hoverghost.RecipeBookComponentMixin",
     "hoverghost.RecipeBookPageMixin",
