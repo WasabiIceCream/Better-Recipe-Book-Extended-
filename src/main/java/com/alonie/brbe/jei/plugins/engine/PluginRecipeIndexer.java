@@ -59,8 +59,11 @@ public final class PluginRecipeIndexer {
      *  smithing have datapack holders indexed by the consumer; here they only
      *  provide native layouts for the popup delegate (entries carry layout,
      *  the consumer attaches them instead of re-registering). */
-    /** Gameoverse: per-type cap for the vanilla runtime pass (see indexVanillaRuntimeTypes). */
-    private static final int MAX_VANILLA_RUNTIME_RECIPES = 5000;
+    /** Gameoverse: per-type safety cap for the vanilla runtime pass. Measured on the
+     *  Gameoverse pack: anvil 1324, grindstone 1139, brewing 484, smithing 351, and
+     *  stonecutting over 5000 (small one-in/one-out recipes, which the recipe book
+     *  index deliberately leaves to this pass), so the cap only stops a runaway type. */
+    private static final int MAX_VANILLA_RUNTIME_RECIPES = 50000;
 
     private static final List<String> VANILLA_PLUGIN_TYPES =
             List.of("minecraft:anvil", "minecraft:brewing", "minecraft:grindstone",
