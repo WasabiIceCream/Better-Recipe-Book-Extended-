@@ -11,8 +11,10 @@ import net.fabricmc.loader.api.FabricLoader;
  * 2026-08-28, and with it every file BRBE keeps. Players upgrading from the
  * 2.3-beta.3 backport would lose their pins and workstation data. Copy each old
  * file to its new name once, before anything reads them, and never overwrite a
- * new file that already exists. The config (zzzbrbe.toml -> brbe.toml) is
- * included for players who don't get brbe.toml from the server.
+ * new file that already exists. The config is deliberately NOT migrated: the old
+ * zzzbrbe.toml keeps unlockAll under [newRecipes], which the new build ignores, so a
+ * copied file would come up with upstream's new default unlockAll = true. Gameoverse
+ * ships brbe.toml through AutoModpack instead.
  */
 final class LegacyFileMigration {
     private LegacyFileMigration() {
@@ -25,7 +27,6 @@ final class LegacyFileMigration {
         copy(game.resolve("zzzbrbe.tabpins.json"), game.resolve("brbe.tabpins.json"));
         copy(game.resolve("zzzbrbe.pinoverlays.json"), game.resolve("brbe.pinoverlays.json"));
         copy(config.resolve("zzzbrbe_workstations.json"), config.resolve("brbe_workstations.json"));
-        copy(config.resolve("zzzbrbe.toml"), config.resolve("brbe.toml"));
     }
 
     private static void copy(Path from, Path to) {
