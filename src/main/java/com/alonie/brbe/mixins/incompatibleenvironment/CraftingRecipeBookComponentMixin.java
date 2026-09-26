@@ -19,7 +19,7 @@ public abstract class CraftingRecipeBookComponentMixin {
     private void brbe$showAllRecipes(RecipeDisplay recipeDisplay, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue()
                 && BetterRecipeBook.config.showAllRecipesInSurvival
-                && Minecraft.getInstance().gui.screen() instanceof InventoryScreen
+                && Minecraft.getInstance().screen instanceof InventoryScreen
                 && (recipeDisplay instanceof ShapedCraftingRecipeDisplay
                     || recipeDisplay instanceof ShapelessCraftingRecipeDisplay)) {
             cir.setReturnValue(true);

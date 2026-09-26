@@ -64,7 +64,7 @@ public final class ConfigTipsHelper {
     /** 打开配置界面（注入所有注册的轮循行）。所有入口统一走这里。 */
     public static void openConfigScreen(Class configClass, Screen parent) {
         Screen screen = buildConfigScreen(configClass, parent);
-        if (screen != null && screen != parent) Minecraft.getInstance().gui.setScreen(screen);
+        if (screen != null && screen != parent) Minecraft.getInstance().setScreen(screen);
     }
 
     /**

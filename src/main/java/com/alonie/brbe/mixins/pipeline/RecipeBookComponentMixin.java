@@ -568,7 +568,7 @@ public abstract class RecipeBookComponentMixin {
     private void brbe$reapplyPartialMarking(List<RecipeCollection> collections) {
         if (collections == null || collections.isEmpty()) return;
         boolean onInventoryScreen = this.minecraft != null
-                && this.minecraft.gui.screen() instanceof InventoryScreen;
+                && this.minecraft.screen instanceof InventoryScreen;
         ItemStack carried = this.menu != null
                 ? this.menu.getCarried() : ItemStack.EMPTY;
         Set<Item> inventoryItems = PartialCraftingUtil.hashInventory(

@@ -40,7 +40,7 @@ public class PlaceRecipeCarriedMixin {
     @Inject(method = "handlePlaceRecipe", at = @At("HEAD"), cancellable = true)
     private void brbe$placeGridFromCarried(int containerId, RecipeDisplayId recipeId, boolean craftAll, CallbackInfo ci) {
         if (craftAll) return;
-        if (minecraft.gui.screen() == null || !(minecraft.gui.screen() instanceof AbstractRecipeBookScreen<?> screen)) return;
+        if (minecraft.screen == null || !(minecraft.screen instanceof AbstractRecipeBookScreen<?> screen)) return;
         if (!(screen.getMenu() instanceof RecipeBookMenu menu)) return;
 
         RecipeBookComponent<?> component = ((AbstractRecipeBookScreenAccessor) screen).brbe$getRecipeBookComponent();

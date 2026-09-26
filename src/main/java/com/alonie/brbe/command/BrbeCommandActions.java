@@ -116,7 +116,7 @@ public final class BrbeCommandActions {
         try {
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft == null || minecraft.gui == null) return;
-            Screen screen = minecraft.gui.screen();
+            Screen screen = minecraft.screen;
             if (screen instanceof AbstractRecipeBookScreen<?> recipeBookScreen) {
                 RecipeBookComponent<?> component =
                         ((AbstractRecipeBookScreenAccessor) recipeBookScreen).brbe$getRecipeBookComponent();

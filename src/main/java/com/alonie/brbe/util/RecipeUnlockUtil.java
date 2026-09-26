@@ -100,7 +100,7 @@ public class RecipeUnlockUtil {
             return;
         }
         net.minecraft.client.gui.components.toasts.ToastManager toastManager =
-                minecraft.gui.toastManager();
+                minecraft.getToastManager();
         for (RecipeDisplay display : deferredUnlockToasts) {
             try {
                 net.minecraft.client.gui.components.toasts.RecipeToast.addOrUpdate(
@@ -215,7 +215,7 @@ public class RecipeUnlockUtil {
     private static void forceRecipeBookUIRebuild() {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft == null || minecraft.gui == null) return;
-        net.minecraft.client.gui.screens.Screen screen = minecraft.gui.screen();
+        net.minecraft.client.gui.screens.Screen screen = minecraft.screen;
         if (screen instanceof net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener listener) {
             listener.recipesUpdated();
         }

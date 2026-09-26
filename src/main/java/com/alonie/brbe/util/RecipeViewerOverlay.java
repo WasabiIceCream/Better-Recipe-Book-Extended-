@@ -392,7 +392,7 @@ public final class RecipeViewerOverlay {
             restoreSuppressedScreen = null;
             return;
         }
-        if (mc.gui.screen() instanceof AbstractContainerScreen<?> host) {
+        if (mc.screen instanceof AbstractContainerScreen<?> host) {
             restoreSuppressedScreen = host;
             return;
         }
@@ -417,8 +417,8 @@ public final class RecipeViewerOverlay {
         if (mc == null || mc.player == null || mc.level == null) return;
         // 界面已变（关闭/换屏）→ 解除"本界面内不恢复"的抑制；同一界面则跳过恢复，
         // 否则被 ESC 关掉的窗口会在这里复活（见 restoreSuppressedScreen）。
-        if (mc.gui.screen() != restoreSuppressedScreen) restoreSuppressedScreen = null;
-        if (!(mc.gui.screen() instanceof AbstractContainerScreen<?> screen)) return;
+        if (mc.screen != restoreSuppressedScreen) restoreSuppressedScreen = null;
+        if (!(mc.screen instanceof AbstractContainerScreen<?> screen)) return;
         for (ViewSpec spec : new ArrayList<>(viewerSpecs)) {
             if (spec.materialized || spec.snoozed) continue;
             ViewerInstance w = new ViewerInstance();
@@ -2112,7 +2112,7 @@ public final class RecipeViewerOverlay {
             if (!fuelSlot.getItem().isEmpty()) return;
             try {
                 SlotDisplay display = new SlotDisplay.ItemStackSlotDisplay(
-                        ItemStackTemplate.fromStack(new ItemStack(fuel.getItem(), 1)));
+                        ItemStackTemplate.fromNonEmptyStack(new ItemStack(fuel.getItem(), 1)));
                 ((GhostSlotsSetSlotAccessor) ghostSlots).brbe$setSlot(
                         fuelSlot, SlotDisplayContext.fromLevel(mc.level), display, false);
                 fuelGhostActive = true;
@@ -3134,7 +3134,7 @@ public final class RecipeViewerOverlay {
         if (collection != null
                 && BetterRecipeBook.config.showAllRecipesInSurvival
                 && !BetterRecipeBook.config.hideIncompatibleMark
-                && mc.gui.screen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen) {
+                && mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen) {
             if (IncompatibleCraftingUtil.checkIncompatible(collection, id)) {
                 lines.add(Component.empty());
                 lines.add(Component.translatable("brbe.gui.environmentIncompatible")

@@ -45,7 +45,7 @@ public abstract class GhostSlotsCycleLockMixin {
     /** 幽灵物品所在容器界面的原点（{@code leftPos/topPos}）；不是容器界面时退回 (0,0)。 */
     @Unique
     private static int[] brbe$containerOrigin() {
-        Screen screen = Minecraft.getInstance().gui.screen();
+        Screen screen = Minecraft.getInstance().screen;
         if (!(screen instanceof AbstractContainerScreen<?> containerScreen)) {
             return new int[2];
         }

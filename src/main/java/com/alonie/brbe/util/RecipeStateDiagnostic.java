@@ -135,7 +135,7 @@ public final class RecipeStateDiagnostic {
 
                 if (needsGrid) {
                     // 3×3 配方：2×2 生存网格放不下（工作台是 3×3 网格，3×3 配方可正常放置）。
-                    if (mc.gui.screen() instanceof InventoryScreen
+                    if (mc.screen instanceof InventoryScreen
                             && !BetterRecipeBook.config.showAllRecipesInSurvival) {
                         // showAll 关闭的 2×2 背包网格：3×3 完全不应出现
                         ok = !inCraftable && !isPartial;

@@ -105,7 +105,7 @@ public abstract class RecipeBookComponentMixin {
         boolean retainIncompatible = BetterRecipeBook.config.showAllRecipesInSurvival
                 && !isFiltering
                 && this.minecraft != null
-                && this.minecraft.gui.screen() instanceof InventoryScreen;
+                && this.minecraft.screen instanceof InventoryScreen;
         IncompatibleCraftingUtil.beginFiltering(retainIncompatible);
     }
 
@@ -147,7 +147,7 @@ public abstract class RecipeBookComponentMixin {
 
         // ── Gate variables: single point of truth for each concern ──
         boolean onInventoryScreen = this.minecraft != null
-                && this.minecraft.gui.screen() instanceof InventoryScreen;
+                && this.minecraft.screen instanceof InventoryScreen;
         boolean retainPartial = BetterRecipeBook.config.partialMarkingEnabled;
         boolean retainIncompatible = onInventoryScreen
                 && BetterRecipeBook.config.showAllRecipesInSurvival;
@@ -406,7 +406,7 @@ public abstract class RecipeBookComponentMixin {
         // 开关开启 + 物品栏界面 = canDisplay 被强制放行（3×3 也进 selected）
         boolean forceShowAll = BetterRecipeBook.config.showAllRecipesInSurvival
                 && this.minecraft != null
-                && this.minecraft.gui.screen() instanceof InventoryScreen;
+                && this.minecraft.screen instanceof InventoryScreen;
         sig = sig * 31 + gridWidth;
         sig = sig * 31 + gridHeight;
         sig = sig * 31 + (forceShowAll ? 1 : 0);

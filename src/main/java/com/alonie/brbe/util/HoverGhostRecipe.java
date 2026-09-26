@@ -165,7 +165,7 @@ public final class HoverGhostRecipe {
     @Nullable
     public static RecipeBookComponent<?> currentBook() {
         Minecraft mc = Minecraft.getInstance();
-        Screen screen = mc.gui.screen();
+        Screen screen = mc.screen;
         if (screen instanceof AbstractRecipeBookScreen<?> recipeBookScreen) {
             return ((AbstractRecipeBookScreenAccessor) recipeBookScreen).brbe$getRecipeBookComponent();
         }

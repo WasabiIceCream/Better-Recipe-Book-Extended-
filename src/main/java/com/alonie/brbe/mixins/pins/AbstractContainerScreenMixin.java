@@ -201,7 +201,7 @@ public abstract class AbstractContainerScreenMixin {
         // when <chat key> is pressed, focus recipes component for searchBox
         // this also works for BrewingRecipeBookComponent as the super's searchBox is set to the same object
         if (ClientCompat.matches(minecraft.options.keyChat, event.key(), event.scancode(), event.modifiers())) {
-            minecraft.gui.screen().setFocused(book);
+            minecraft.screen.setFocused(book);
         }
     }
 

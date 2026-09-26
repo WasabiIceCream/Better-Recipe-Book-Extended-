@@ -62,7 +62,7 @@ public final class RecipeBookGesture {
             return false;
         }
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft == null || minecraft.gui == null || minecraft.gui.overlay() != null) {
+        if (minecraft == null || minecraft.gui == null || minecraft.getOverlay() != null) {
             return false;
         }
         // ★ 桌面窗口语义优先（2026-09-25 修正）：查询界面 / pin / 预览 拥有光标时，
@@ -80,7 +80,7 @@ public final class RecipeBookGesture {
             RecipeViewerOverlay.mouseScrolled(mouseX, mouseY, verticalAmount);
             return true;
         }
-        Screen screen = minecraft.gui.screen();
+        Screen screen = minecraft.screen;
         if (!(screen instanceof AbstractRecipeBookScreen<?> bookScreen)) {
             return false;
         }
@@ -118,7 +118,7 @@ public final class RecipeBookGesture {
         if (minecraft == null || minecraft.gui == null) {
             return false;
         }
-        Screen screen = minecraft.gui.screen();
+        Screen screen = minecraft.screen;
         if (!(screen instanceof AbstractRecipeBookScreen<?> bookScreen)) {
             return false;
         }

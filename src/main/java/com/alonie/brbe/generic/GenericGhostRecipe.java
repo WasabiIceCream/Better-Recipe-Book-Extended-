@@ -200,7 +200,7 @@ public class GenericGhostRecipe<R extends GenericRecipe> {
 
         this.lastHoveredItem = itemStack;
 
-        if (itemStack != null && Minecraft.getInstance().gui.screen() != null) {
+        if (itemStack != null && Minecraft.getInstance().screen != null) {
             List<Component> tooltip = Screen.getTooltipFromItem(Minecraft.getInstance(), itemStack);
             if (BetterRecipeBook.config != null && BetterRecipeBook.config.showModName) {
                 Component modName = ModNameUtil.getFormattedModName(itemStack);

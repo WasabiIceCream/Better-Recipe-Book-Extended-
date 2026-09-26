@@ -50,7 +50,6 @@ public abstract class PauseScreenConfigButtonMixin extends Screen {
                         true)
                 .size(20, 20)
                 .sprite(Identifier.fromNamespaceAndPath("brbe", "pause_menu/brbe"), 20, 18)
-                .spriteOffset(0, 0)
                 .build();
         button.setTooltip(Tooltip.create(message));
         row.addChild(button);
@@ -68,7 +67,7 @@ public abstract class PauseScreenConfigButtonMixin extends Screen {
      */
     @Unique
     private void brbe$openConfigFromPauseMenu(Button button) {
-        Minecraft.getInstance().gui.setScreen(createConfigScreen(this));
+        Minecraft.getInstance().setScreen(createConfigScreen(this));
     }
 
     /** 构建 Cloth Config 配置屏 —— **必须走 ConfigTipsHelper**（与书内设置按钮、ModMenu 同源）：

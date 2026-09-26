@@ -171,7 +171,7 @@ public class BetterRecipeBookClientFabric implements ClientModInitializer {
             // 锻造 trim 的 fallback layout 轮询（同步配方/引擎条目时序未对齐时
             // 首轮 attach 失败；数据就绪后补挂一次，完成即 O(1) 返回）。
             com.alonie.brbe.cache.BrbeJeiBridge.pollSmithingLayoutFallback();
-            Screen screen = client.gui.screen();
+            Screen screen = client.screen;
             if (screen == null || this.registeredScreens.contains(screen) || !TopLayerOverlayRenderer.hasOverlay(screen)) {
                 return;
             }

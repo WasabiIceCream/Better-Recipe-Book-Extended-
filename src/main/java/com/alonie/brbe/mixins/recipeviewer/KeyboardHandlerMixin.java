@@ -39,7 +39,7 @@ public abstract class KeyboardHandlerMixin {
     private void brbe$viewerKeysEarly(long window, int key, KeyEvent event, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.gui == null) return;
-        Screen screen = mc.gui.screen();
+        Screen screen = mc.screen;
         if (!(screen instanceof AbstractContainerScreen<?> containerScreen)) {
             brbe$activeKeyCode = -1;
             return;

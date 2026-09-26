@@ -66,7 +66,9 @@ dependencies {
     // 无头 JEI 独立化：mezz.jei.api 编译参考 = headless-jei 独立产物 jar
     // （26.2 官方映射/Extractor 签名，与 no-remap 编译一致）；运行时由
     // jar-in-jar 内嵌的 headless-jei mod / 真实 JEI 提供。
-    compileOnly files(rootProject.file("libs/headless-jei-fabric-26.2-1.0.0.jar"))
+    // Gameoverse 26.1.2 backport: compile against the real JEI this server runs;
+    // the embedded headless-jei (26.2 build, own copies of mezz.jei classes) is dropped.
+    compileOnly files(rootProject.file("libs/jei-26.1.2-fabric-29.43.0.105.jar"))
 }
 
 tasks.withType(JavaCompile) {

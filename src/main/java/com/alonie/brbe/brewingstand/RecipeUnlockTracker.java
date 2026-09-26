@@ -449,7 +449,7 @@ public final class RecipeUnlockTracker {
                             new net.minecraft.world.item.crafting.display.SlotDisplay.ItemStackSlotDisplay(
                                     new net.minecraft.world.item.ItemStackTemplate(
                                             net.minecraft.world.item.Items.BREWING_STAND)));
-            ToastManager manager = mc.gui != null ? mc.gui.toastManager() : null;
+            ToastManager manager = mc.getToastManager();
             if (manager != null) {
                 RecipeToast.addOrUpdate(manager, display);
             }

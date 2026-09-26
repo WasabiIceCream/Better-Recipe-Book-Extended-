@@ -72,7 +72,7 @@ public final class SyntheticRecipeDisplayEntryFactory {
             for (ItemStack stack : stacks) {
                 if (stack != null && !stack.isEmpty()) {
                     children.add(new SlotDisplay.ItemStackSlotDisplay(
-                            ItemStackTemplate.fromStack(stack)));
+                            ItemStackTemplate.fromNonEmptyStack(stack)));
                 }
             }
         }
