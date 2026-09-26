@@ -182,12 +182,12 @@ public final class PluginRecipeIndexer {
                     continue;
                 }
                 List<JeiRecipeRegistry.Entry> indexed = new ArrayList<>();
-                Set<String> seen = new HashSet<>();
+                Set<RecipeKey> seen = new HashSet<>();
                 for (Object recipe : recipes) {
                     JeiRecipeRegistry.Entry entry = buildEntry(
                             Identifier.parse(uid), category, recipe);
                     if (entry == null) continue;
-                    String fingerprint = fingerprint(entry);
+                    RecipeKey fingerprint = fingerprint(entry);
                     if (!seen.add(fingerprint)) continue;
                     indexed.add(entry);
                 }
@@ -471,32 +471,34 @@ public final class PluginRecipeIndexer {
      *  Unbreaking books) and brewing recipes of the same potion item all shared
      *  one fingerprint, so only the FIRST variant survived the {@code seen}
      *  set and every other enchantment was silently dropped. */
-    private static String fingerprint(JeiRecipeRegistry.Entry entry) {
-        StringBuilder sb = new StringBuilder();
+    /** Gameoverse: the dedup key as two independent 64-bit hashes of every input
+     *  and product stack's item + full components ({@link ItemStack#hashItemAndComponents},
+     *  the same data the old text key spelled out). The text key built one string per
+     *  recipe with every component's toString; against real JEI in this modpack those
+     *  strings exhausted an 8 GB heap. Still distinguishes stacks that differ only in
+     *  components (Sharpness vs Unbreaking books), which is why the key exists. */
+    private record RecipeKey(long a, long b) {}
+
+    private static RecipeKey fingerprint(JeiRecipeRegistry.Entry entry) {
+        long a = 1469598103934665603L;
+        long b = 0x9E3779B97F4A7C15L;
         if (entry.inputs() != null) {
             for (ItemStack stack : entry.inputs()) {
-                sb.append(stackKey(stack)).append(',');
+                int h = stack == null || stack.isEmpty() ? 0 : ItemStack.hashItemAndComponents(stack);
+                a = (a ^ h) * 1099511628211L;
+                b = Long.rotateLeft(b + h * 0xC2B2AE3D27D4EB4FL, 31) * 0x165667B19E3779F9L;
             }
         }
-        sb.append('=');
+        a = (a ^ 0x3D) * 1099511628211L;     // the old '=' between inputs and outputs
+        b = Long.rotateLeft(b ^ 0x3D, 27) * 0x94D049BB133111EBL;
         if (entry.outputs() != null) {
             for (ItemStack stack : entry.outputs()) {
-                sb.append(stackKey(stack)).append(',');
+                int h = stack == null || stack.isEmpty() ? 0 : ItemStack.hashItemAndComponents(stack);
+                a = (a ^ h) * 1099511628211L;
+                b = Long.rotateLeft(b + h * 0xC2B2AE3D27D4EB4FL, 31) * 0x165667B19E3779F9L;
             }
         }
-        return sb.toString();
-    }
-
-    /** {@code stack} 的稳定键：注册 id + 逐组件序列化（组件 {@code toString}
-     *  只要求同一轮收集内一致——dedup 只在单次收集内生效）。 */
-    private static String stackKey(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) return "";
-        StringBuilder sb = new StringBuilder(
-                String.valueOf(BuiltInRegistries.ITEM.getKey(stack.getItem())));
-        for (TypedDataComponent<?> tc : stack.getComponents()) {
-            sb.append('/').append(tc.type()).append('=').append(tc.value());
-        }
-        return sb.toString();
+        return new RecipeKey(a, b);
     }
 
     private static List<ItemStack> merge(List<ItemStack> a, List<ItemStack> b) {
