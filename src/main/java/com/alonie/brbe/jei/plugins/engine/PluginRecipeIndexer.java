@@ -59,6 +59,9 @@ public final class PluginRecipeIndexer {
      *  smithing have datapack holders indexed by the consumer; here they only
      *  provide native layouts for the popup delegate (entries carry layout,
      *  the consumer attaches them instead of re-registering). */
+    /** Gameoverse: per-type cap for the vanilla runtime pass (see indexVanillaRuntimeTypes). */
+    private static final int MAX_VANILLA_RUNTIME_RECIPES = 5000;
+
     private static final List<String> VANILLA_PLUGIN_TYPES =
             List.of("minecraft:anvil", "minecraft:brewing", "minecraft:grindstone",
                     "minecraft:stonecutting", "minecraft:smithing");
@@ -159,13 +162,25 @@ public final class PluginRecipeIndexer {
                 if (category == null) continue;
                 List<?> recipes;
                 try {
-                    recipes = manager.createRecipeLookup(category.getRecipeType()).get().toList();
+                    // Gameoverse: stream with a cap. With real JEI in a big modpack these
+                    // types can be enormous (anvil = every enchantable item x every
+                    // enchantment); materialising them all and fingerprinting each with
+                    // full components ran an 8 GB client out of memory right after joining.
+                    // An oversized type is left to JEI's own recipe screens.
+                    recipes = manager.createRecipeLookup(category.getRecipeType()).get()
+                            .limit(MAX_VANILLA_RUNTIME_RECIPES + 1L).toList();
                 } catch (Exception | LinkageError e) {
                     HeadlessJeiLog.log("BRBE-JEI-PLUGINS", "vanilla {} recipe lookup failed: {}",
                             uid, e.toString());
                     continue;
                 }
                 if (recipes.isEmpty()) continue;
+                if (recipes.size() > MAX_VANILLA_RUNTIME_RECIPES) {
+                    com.alonie.brbe.BetterRecipeBook.LOGGER.info(
+                            "[BRBE] Skipping JEI runtime type {} for the recipe viewer: more than {} recipes (use JEI's own view)",
+                            uid, MAX_VANILLA_RUNTIME_RECIPES);
+                    continue;
+                }
                 List<JeiRecipeRegistry.Entry> indexed = new ArrayList<>();
                 Set<String> seen = new HashSet<>();
                 for (Object recipe : recipes) {
