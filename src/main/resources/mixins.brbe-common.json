@@ -37,6 +37,7 @@
     "accessors.ScreenAccessor",
     "accessors.ServerRecipeBookAccessor",
     "accessors.StackedItemContentsAccessor",
+    "hideoverlay.AbstractContainerScreenMixin",
     "incompatibleenvironment.CraftingRecipeBookComponentMixin",
     "incompatibleenvironment.RecipeBookComponentMixin",
     "incompatibleenvironment.RecipeButtonMixin",
