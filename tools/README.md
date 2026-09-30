@@ -9,7 +9,10 @@ Run both from the repo root after `./gradlew classes`:
     python3 tools/check_shadows.py      # every @Shadow is declared on the target class
                                         # itself; @Accessor/@Invoker members exist
 
-Both read the game jar from Loom's cache and real JEI from `libs/`. Known false
-alarms: constructors of generic classes (check those by hand with `javap -c`).
+Both read the game jar from Loom's cache and real JEI from `libs/`. Constructor
+targets (`Foo;<init>(...)V`) are matched against javap's quoted `Foo."<init>"`
+form since 2026-09-30 (before that every constructor target was reported NOT
+FOUND, e.g. the cycle-lock `GhostSlots`/`RecipeBookPage` ModifyArgs). If one
+still looks wrong, check it by hand with `javap -c`.
 The injection check caught the PauseScreenConfigButtonMixin crash (26.2's pause
 menu icon row doesn't exist in 26.1.2) when self-tested against it.

@@ -44,7 +44,9 @@ for f in pathlib.Path('src/main/java').rglob('*.java'):
     tgt=[t for t in tgt if exists(t)] or [t for t in tgt if exists(t.rsplit('/',1)[0]+'$'+t.rsplit('/',1)[1])]
     if not tgt: continue
     for a in ann_re.finditer(s):
-        start=a.end(); end=re.search(r'\)\s*\n\s*(?:private|public|protected|static|@)',s[start:])
+        # The annotation ends where the next line starts the annotated method (any modifier,
+        # including none: package-private `void init(...)`) or another annotation.
+        start=a.end(); end=re.search(r'\)\s*\n\s*(?:private|public|protected|static|final|abstract|synchronized|void|@|[\w.<>\[\],? ]+\s+\w+\s*\()',s[start:])
         block=s[start:start+(end.end() if end else 800)]
         methods=[]
         for grp in re.findall(r'method\s*=\s*(\{[^}]*\}|"[^"]*")',block): methods+=re.findall(r'"([^"]+)"',grp)
@@ -70,8 +72,10 @@ for f in pathlib.Path('src/main/java').rglob('*.java'):
                     ok=any(f'// class {cls}' in b for b in bodies_for)
                 elif m:
                     owner,mname,colon,desc=m.groups()
-                    needle=f'{owner}.{mname}:{desc}' if desc else f'{owner}.{mname}:'
-                    ok=any(needle in b or (not desc and f'{owner}.{mname}' in b) for b in bodies_for)
+                    # javap quotes special names: GhostSlots."<init>":(...)V
+                    jn=f'"{mname}"' if mname.startswith('<') else mname
+                    needle=f'{owner}.{jn}:{desc}' if desc else f'{owner}.{jn}:'
+                    ok=any(needle in b or (not desc and f'{owner}.{jn}' in b) for b in bodies_for)
                 else: continue
                 if not ok: problems.append(f'{rel}: @{a.group(1)} in {name}: {kind} {target} NOT FOUND in 26.1.2 body')
 print('injection points checked:',checked)
