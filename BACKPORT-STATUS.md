@@ -246,3 +246,40 @@ drawn in `drawForeground`, which the screen calls directly, so they showed again
 mixins now cancel `drawScreen`, `drawBackground` and `drawForeground` while `hideReiJeiOverlay` is on. Mixin checks: the
 same 3 pre-existing NOT FOUND results as before this change (SmithingScreenMixin, two cyclelock ModifyArgs), not
 introduced here; worth a separate look.
+
+## Mixin-check false alarms and the JEI plugin replay (2026-09-30)
+
+**The 3 NOT FOUND mixin-check results were checker bugs.** `javap` of the 26.1.2 classes: `RecipeBookComponent.<init>`
+does `new GhostSlots(SlotSelectTime)` and `new RecipeBookPage(this, SlotSelectTime, boolean)` exactly as the cycle-lock
+`@ModifyArg`s expect, and `SmithingScreen.extractBackground` calls `CyclingSlotBackground.extractRenderState(...)` three
+times (that target belongs to the `@Redirect` on `extractBackground`; the `@Inject` in `subInit` is `@At("RETURN")`).
+`tools/check_injections.py` (a) never matched a constructor target, because javap prints `GhostSlots."<init>"`, and (b)
+let an annotation on a package-private method (`void init(...)`, no modifier) run on into the next injector's target.
+Both fixed; the checker now reports 0 problems (19 points). No mixin change was needed: no warnings for these in the
+Working instance log, and the cycle lock (X) was verified in-game on 2026-09-26.
+
+**JEI plugin replay failed for Bits and Balance, Create and Polymer.** BRBE re-runs every mod's JEI plugin
+(`BrbeJeiPlugins.collectAndInject`, once per join after the JEI runtime exists) against its own collector objects to
+index their recipes for BRBE's own recipe viewer (LEI windows, BRBE's popups/pins). The collectors returned `null` for
+`getIngredientManager()`, `getVanillaRecipeFactory()` and `getContextMap()`, so:
+- Bits and Balance threw at its first call (`createBrewingRecipe`): its brewing and Kiln recipes were never indexed.
+- Create threw at `getAllIngredients` after `automatic_brewing`: draining, spout filling, toolbox and block cutting missing.
+- Polymer threw on `synchronized (manager)` (it has no virtual items here, so nothing was missing).
+Real JEI was unaffected (it loads plugins itself with its own registrations; its log shows all three registering).
+With LEI off in Gameoverse, R/U and station clicks open real JEI, so players mostly saw nothing; the gap showed only in
+BRBE's own viewer if LEI is switched on.
+
+Fix: new `jei/plugins/stub/JeiRuntimeView` gives the collectors and `JeiHelpersStub` the runtime's objects: the vanilla
+recipe factory (`IJeiHelpers.getVanillaRecipeFactory()`), `SlotDisplayContext.fromLevel(level)` as the context map
+(what JEI passes), the other helpers delegated (the GUI helper stays the recording stub), and the ingredient manager as
+a **read-only proxy**: `addIngredientsAtRuntime`/`removeIngredientsAtRuntime`/`registerIngredientListener` are dropped,
+because Polymer's `registerRecipes` removes and re-adds its items and the replay must not change live JEI a second time.
+All still `null` when no runtime exists. `CatalystCollector.getJeiHelpers()` now returns the stub instead of `null`.
+
+Also logged: "broken fabric plugin container: InvocationTargetException" was Haunted Harvest, whose `jei_mod_plugin`
+class (`net.mehvahdjukaar.hauntedharvest.integration.JEICompat`) is missing from its own jar; real JEI logs the same
+error. Not ours to fix; the warning now names the mod and the root cause.
+
+To check after joining: `latest.log` has no `[BRBE-JEI-Plugins] plugin ... failed`; `logs/brbe-debug.log` lists
+`mod type create:draining`, `create:spout_filling`, `create:block_cutting` and `bitsandbalance:*`/`minecraft:brewing`
+lines, and `collected from plugin bitsandbalance:jei_plugin`/`create:jei_plugin`/`polymer:jei_plugin`.
