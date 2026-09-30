@@ -237,3 +237,12 @@ lock X (upstream's Alt clashes with Create/Spell Engine/Heirlooms).
 and crafting tables; JEI list plus its gear/bookmark buttons hidden; R/U and
 workstation clicks open JEI's screen; stonecutter recipes indexed; hover ghost
 preview; X cycle lock; memory steady after joining.
+
+## JEI corner buttons visible again after the 2.3.1 rebase (2026-09-30)
+
+The rebase onto upstream 2.3.1 took upstream's `hideoverlay` mixins, which target only `drawScreen` plus
+`isListDisplayed`. With JEI 29.43 the list is hidden by `isListDisplayed`, but the config gear and bookmark buttons are
+drawn in `drawForeground`, which the screen calls directly, so they showed again (the 2026-09-14 fix, lost). Both
+mixins now cancel `drawScreen`, `drawBackground` and `drawForeground` while `hideReiJeiOverlay` is on. Mixin checks: the
+same 3 pre-existing NOT FOUND results as before this change (SmithingScreenMixin, two cyclelock ModifyArgs), not
+introduced here; worth a separate look.

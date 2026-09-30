@@ -12,7 +12,7 @@ public abstract class BookmarkOverlayMixin {
 
     private static boolean warned;
 
-    @Inject(method = "drawScreen", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = {"drawScreen", "drawBackground", "drawForeground"}, at = @At("HEAD"), cancellable = true, remap = false)
     private void brbe$cancelBookmarkOverlay(CallbackInfo ci) {
         // Hidden only while the config toggle is on — see
         // IngredientListOverlayMixin (BRBE overlays must not hide real JEI).

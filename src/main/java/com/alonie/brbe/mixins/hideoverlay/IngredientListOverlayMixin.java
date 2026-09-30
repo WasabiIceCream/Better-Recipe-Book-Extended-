@@ -12,7 +12,7 @@ public abstract class IngredientListOverlayMixin {
 
     private static boolean warned;
 
-    @Inject(method = "drawScreen", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = {"drawScreen", "drawBackground", "drawForeground"}, at = @At("HEAD"), cancellable = true, remap = false)
     private void brbe$cancelIngredientListOverlay(CallbackInfo ci) {
         // Hidden only while the config toggle is on.  BRBE overlays (query
         // viewer / pins) must NOT hide the real JEI: co-existence is expected
