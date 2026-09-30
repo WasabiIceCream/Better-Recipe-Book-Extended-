@@ -36,7 +36,12 @@ public final class BrbeJeiPluginFinder {
                     Object entrypoint = container.getClass().getMethod("getEntrypoint").invoke(container);
                     if (entrypoint instanceof IModPlugin plugin) out.add(plugin);
                 } catch (ReflectiveOperationException | LinkageError e) {
-                    LOGGER.warn("[BRBE-JEI-Plugins] broken fabric plugin container: {}", e.toString());
+                    // [Gameoverse backport] name the mod and the root cause (JEI logs the same
+                    // entrypoint failure with a full trace; e.g. a plugin class missing from its jar).
+                    Throwable root = e;
+                    while (root.getCause() != null && root.getCause() != root) root = root.getCause();
+                    LOGGER.warn("[BRBE-JEI-Plugins] skipping {}'s JEI plugin, its entrypoint failed to load: {}",
+                            providerId(container), root.toString());
                 }
             }
         } catch (ReflectiveOperationException | LinkageError e) {
@@ -44,4 +49,13 @@ public final class BrbeJeiPluginFinder {
         }
     }
 
+    private static String providerId(Object container) {
+        if (container instanceof net.fabricmc.loader.api.entrypoint.EntrypointContainer<?> c) {
+            try {
+                return c.getProvider().getMetadata().getId();
+            } catch (RuntimeException | LinkageError ignored) {
+            }
+        }
+        return "<unknown mod>";
+    }
 }

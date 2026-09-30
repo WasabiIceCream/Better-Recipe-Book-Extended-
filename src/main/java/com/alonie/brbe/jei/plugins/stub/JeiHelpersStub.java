@@ -22,6 +22,11 @@ import java.util.stream.Stream;
  * Minimal {@link IJeiHelpers}: provides a {@link GuiHelperStub} (the one helper
  * plugin category constructors actually need), and null/empty for the rest.
  * BRBE only reads the recipes a plugin exposes via {@code setRecipe}.
+ *
+ * <p>[Gameoverse backport] Apart from the GUI helper (kept: it records category
+ * backgrounds), every helper now comes from the JEI runtime when one exists
+ * (see {@link JeiRuntimeView}); the ingredient manager is its read-only view.
+ * Null/empty only while no runtime is up.</p>
  */
 public final class JeiHelpersStub implements IJeiHelpers {
 
@@ -36,61 +41,71 @@ public final class JeiHelpersStub implements IJeiHelpers {
 
     @Override
     public IStackHelper getStackHelper() {
-        return null;
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? null : h.getStackHelper();
     }
 
     @Override
     public IModIdHelper getModIdHelper() {
-        return null;
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? null : h.getModIdHelper();
     }
 
     @Override
     public IFocusFactory getFocusFactory() {
-        return null;
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? null : h.getFocusFactory();
     }
 
     @Override
     public IColorHelper getColorHelper() {
-        return null;
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? null : h.getColorHelper();
     }
 
     @Override
     public IPlatformFluidHelper<?> getPlatformFluidHelper() {
-        return null;
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? null : h.getPlatformFluidHelper();
     }
 
     @Override
     public <T> Optional<IRecipeType<T>> getRecipeType(Identifier uid, Class<? extends T> recipeClass) {
-        return Optional.empty();
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? Optional.empty() : h.getRecipeType(uid, recipeClass);
     }
 
     @Override
     public Optional<IRecipeType<?>> getRecipeType(Identifier uid) {
-        return Optional.empty();
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? Optional.empty() : h.getRecipeType(uid);
     }
 
     @Override
     public Stream<IRecipeType<?>> getAllRecipeTypes() {
-        return Stream.empty();
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? Stream.empty() : h.getAllRecipeTypes();
     }
 
     @Override
     public IIngredientManager getIngredientManager() {
-        return null;
+        return JeiRuntimeView.ingredientManager();
     }
 
     @Override
     public ICodecHelper getCodecHelper() {
-        return null;
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? null : h.getCodecHelper();
     }
 
     @Override
     public IVanillaRecipeFactory getVanillaRecipeFactory() {
-        return null;
+        return JeiRuntimeView.vanillaRecipeFactory();
     }
 
     @Override
     public IIngredientVisibility getIngredientVisibility() {
-        return null;
+        IJeiHelpers h = JeiRuntimeView.runtimeHelpers();
+        return h == null ? null : h.getIngredientVisibility();
     }
 }

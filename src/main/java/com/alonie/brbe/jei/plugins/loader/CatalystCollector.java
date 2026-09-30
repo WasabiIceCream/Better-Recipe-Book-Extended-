@@ -77,12 +77,12 @@ public final class CatalystCollector implements IRecipeCatalystRegistration {
 
     @Override
     public IIngredientManager getIngredientManager() {
-        return null;
+        return com.alonie.brbe.jei.plugins.stub.JeiRuntimeView.ingredientManager();
     }
 
     @Override
     public IJeiHelpers getJeiHelpers() {
-        return null;
+        return com.alonie.brbe.jei.plugins.stub.JeiHelpersStub.INSTANCE;
     }
 
     private <T> void addTyped(IRecipeType<?> recipeType, IIngredientType<T> ingredientType, T ingredient) {

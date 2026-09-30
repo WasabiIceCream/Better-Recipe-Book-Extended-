@@ -36,17 +36,17 @@ public final class RecipeCollector implements IRecipeRegistration {
 
     @Override
     public IIngredientManager getIngredientManager() {
-        return null;
+        return com.alonie.brbe.jei.plugins.stub.JeiRuntimeView.ingredientManager();
     }
 
     @Override
     public IVanillaRecipeFactory getVanillaRecipeFactory() {
-        return null;
+        return com.alonie.brbe.jei.plugins.stub.JeiRuntimeView.vanillaRecipeFactory();
     }
 
     @Override
     public ContextMap getContextMap() {
-        return null;
+        return com.alonie.brbe.jei.plugins.stub.JeiRuntimeView.contextMap();
     }
 
     @Override
