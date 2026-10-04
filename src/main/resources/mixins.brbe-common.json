@@ -17,6 +17,7 @@
     "accessors.AbstractRecipeBookScreenAccessor",
     "accessors.BrewingStandMenuAccessor",
     "accessors.ClientRecipeBookAccessor",
+    "accessors.ClientPacketListenerInvoker",
     "accessors.EditBoxPreeditAccessor",
     "accessors.IMEPreeditOverlayAccessor",
     "accessors.CreativeModeTabsAccessor",

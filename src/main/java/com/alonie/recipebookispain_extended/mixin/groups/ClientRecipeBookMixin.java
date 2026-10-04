@@ -43,6 +43,18 @@ public class ClientRecipeBookMixin {
     @Shadow @Final private Map<RecipeDisplayId, RecipeDisplayEntry> known;
     @Shadow private Map<ExtendedRecipeBookCategory, List<RecipeCollection>> collectionsByTab;
 
+    /**
+     * Gameoverse: each crafting recipe's creative group, by entry identity (server entries stay the same objects
+     * across rebuilds; resolving result stacks was ~60 ms per rebuild in a client profile). Dropped when group
+     * routing changes ({@link RecipeBookIsPain#groupsVersion}) or it grows well past the known set.
+     */
+    @Unique
+    private static final Map<RecipeDisplayEntry, Object> RBIP_GROUP_CACHE = new java.util.IdentityHashMap<>();
+    @Unique
+    private static final Object RBIP_NO_GROUP = new Object();
+    @Unique
+    private static int rbip$groupCacheVersion = -1;
+
     @Unique
     private static final ContextMap RBIP_EMPTY_CONTEXT = new ContextMap.Builder().create(new ContextKeySet.Builder().build());
 
@@ -77,6 +89,11 @@ public class ClientRecipeBookMixin {
         RecipeBookIsPain.FURNACE_ACTIVE_TABS.clear();
         RecipeBookIsPain.SMOKER_ACTIVE_TABS.clear();
         RecipeBookIsPain.BLAST_FURNACE_ACTIVE_TABS.clear();
+
+        if (rbip$groupCacheVersion != RecipeBookIsPain.groupsVersion || RBIP_GROUP_CACHE.size() > this.known.size() * 2 + 64) {
+            RBIP_GROUP_CACHE.clear();
+            rbip$groupCacheVersion = RecipeBookIsPain.groupsVersion;
+        }
 
         Map<ExtendedRecipeBookCategory, EntryBucket> buckets = new LinkedHashMap<>();
         Map<ExtendedRecipeBookCategory, EntryBucket> furnaceBuckets = new LinkedHashMap<>();
@@ -125,7 +142,14 @@ public class ClientRecipeBookMixin {
                         && cat != RecipeBookCategories.CRAFTING_MISC
                         && cat != SearchRecipeBookCategory.CRAFTING) continue;
 
-                ExtendedRecipeBookCategory group = rbip$getGroupForEntry(entry);
+                Object cached = RBIP_GROUP_CACHE.get(entry);
+                ExtendedRecipeBookCategory group;
+                if (cached == null) {
+                    group = rbip$getGroupForEntry(entry);
+                    RBIP_GROUP_CACHE.put(entry, group == null ? RBIP_NO_GROUP : group);
+                } else {
+                    group = cached == RBIP_NO_GROUP ? null : (ExtendedRecipeBookCategory) cached;
+                }
                 if (group == null) continue;
                 rbip$bucketFor(buckets, group).add(entry);
             }

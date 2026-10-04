@@ -95,6 +95,13 @@ public abstract class ClientPacketListenerMixin {
 
     @Inject(method = "refreshRecipeBook", at = @At("HEAD"), cancellable = true)
     private void brbe$skipUnchangedRefresh(ClientRecipeBook book, CallbackInfo ci) {
+        // Gameoverse: add/remove packets defer to one coalesced refresh (RecipeRefreshDebouncer); settings
+        // packets (brbe$forceNextRefresh) still refresh at once, and the deferred flush itself goes through
+        if (!brbe$forceNextRefresh && !com.alonie.brbe.util.RecipeRefreshDebouncer.flushing()) {
+            com.alonie.brbe.util.RecipeRefreshDebouncer.defer(book);
+            ci.cancel();
+            return;
+        }
         if (brbe$forceNextRefresh) {
             // Settings packets do not change the known set but must still
             // reach the UI (filtering state sync).  Let this one through and

@@ -283,3 +283,19 @@ error. Not ours to fix; the warning now names the mod and the root cause.
 To check after joining: `latest.log` has no `[BRBE-JEI-Plugins] plugin ... failed`; `logs/brbe-debug.log` lists
 `mod type create:draining`, `create:spout_filling`, `create:block_cutting` and `bitsandbalance:*`/`minecraft:brewing`
 lines, and `collected from plugin bitsandbalance:jei_plugin`/`create:jei_plugin`/`polymer:jei_plugin`.
+
+## Recipe-unlock hitches (2026-10-03, 2.3.1-backport26.1.2.2)
+
+A fresh character on Gameoverse unlocks recipes in bursts (the server's recipe-unlock data pack has one advancement
+per ingredient), and every `ClientboundRecipeBookAddPacket` ran a full `refreshRecipeBook`. A client spark profile
+(https://spark.lucko.me/DVRX3aj92j) put ~264 of the 284 ms spent in those packets in this mod's rebuild hooks:
+`rbip$refreshCreativeGroups` (~96 ms, mostly resolving every known recipe's result stacks),
+`applyNamespaceOverrides` (~84 ms, walking every item), `RecipeCraftingIndex.rebuild` (~48 ms) and the display
+pipeline (~36 ms). Fixes:
+
+- `RecipeRefreshDebouncer` (+ `ClientPacketListenerInvoker`): add/remove packets defer to one refresh, run once
+  packets are quiet for 5 ticks, at most 20 ticks after the first, or on the next tick while a recipe book screen is
+  open. Settings packets still refresh at once (`brbe$forceNextRefresh`), and the fingerprint skip still applies.
+- `applyNamespaceOverrides` skips when the namespace cache is unchanged (signature over its entries).
+- `rbip$refreshCreativeGroups` caches each crafting entry's group by entry identity; dropped on `groupsVersion`
+  (bumped when overrides apply or a group late-registers) or when it grows past twice the known set.

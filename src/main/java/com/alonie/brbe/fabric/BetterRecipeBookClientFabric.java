@@ -67,6 +67,8 @@ public class BetterRecipeBookClientFabric implements ClientModInitializer {
         // 日志恒写 <gameDir>/logs/brbe-debug.log（没有开关）：BRBE、无头 JEI、
         // 以及被路由过来的官方 mezz.jei 行都在同一个文件里，latest.log 保持干净。
         com.alonie.brbe.util.BrbeLogger.init(Minecraft.getInstance().gameDirectory.toPath());
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(
+                com.alonie.brbe.util.RecipeRefreshDebouncer::tick);
 
         // Register key mappings (previously in common via Architectury).
         // 固定键与查询键的原版绑定与 Cloth Config 键位条目双向同步

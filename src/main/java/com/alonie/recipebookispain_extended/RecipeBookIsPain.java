@@ -160,8 +160,23 @@ public class RecipeBookIsPain {
         return namespaceCache.get(itemNamespace);
     }
 
+    /** Bumped whenever item-to-group routing may have changed; ClientRecipeBookMixin drops its group cache on it. */
+    public static int groupsVersion;
+    private static long lastOverrideSignature;
+    private static boolean overridesApplied;
+
     public static synchronized void applyNamespaceOverrides() {
         if (!namespaceCacheBuilt) buildNamespaceCache();
+        // Gameoverse: this walked every item on every recipe-book rebuild (~84 ms in a client profile); the result
+        // only depends on the namespace cache, so skip it while that is unchanged
+        long signature = 17;
+        for (Map.Entry<String, CreativeModeTab> e : namespaceCache.entrySet()) {
+            signature += e.getKey().hashCode() * 31L + System.identityHashCode(e.getValue());
+        }
+        if (overridesApplied && signature == lastOverrideSignature) return;
+        lastOverrideSignature = signature;
+        overridesApplied = true;
+        groupsVersion++;
         int overridden = 0;
         for (Item item : BuiltInRegistries.ITEM) {
             Identifier id = BuiltInRegistries.ITEM.getKey(item);
@@ -202,6 +217,7 @@ public class RecipeBookIsPain {
         MIRRORED_ITEM_GROUPS.add(group);
         CRAFTING_LIST.add(rg);
         CRAFTING_SEARCH_LIST.add(rg);
+        groupsVersion++;
         BrbeLogger.log("RBIP", "Late-registered group: {}", group.getDisplayName().getString());
     }
 
