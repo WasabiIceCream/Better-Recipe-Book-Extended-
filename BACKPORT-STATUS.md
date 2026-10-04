@@ -299,3 +299,5 @@ pipeline (~36 ms). Fixes:
 - `applyNamespaceOverrides` skips when the namespace cache is unchanged (signature over its entries).
 - `rbip$refreshCreativeGroups` caches each crafting entry's group by entry identity; dropped on `groupsVersion`
   (bumped when overrides apply or a group late-registers) or when it grows past twice the known set.
+
+Confirmed in game by the user the same night: no more hitches while a fresh character unlocks recipes.
